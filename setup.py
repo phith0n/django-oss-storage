@@ -27,7 +27,7 @@ setup(
     description='Django Aliyun OSS (Object Storage Service) storage',
     long_description=readme,
     packages=['django_oss_storage'],
-    install_requires=['django>=1.10',
+    install_requires=['django>=2.0',
                       'oss2>=2.3.3'],
     include_package_data=True,
     url='https://www.aliyun.com/product/oss',
