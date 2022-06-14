@@ -43,12 +43,14 @@ def _normalize_endpoint(endpoint):
     else:
         return endpoint
 
+
 class OssError(Exception):
     def __init__(self, value):
         self.value = value
 
     def __str__(self):
         return repr(self.value)
+
 
 @deconstructible
 class OssStorage(Storage):
@@ -66,12 +68,17 @@ class OssStorage(Storage):
         self.auth = Auth(self.access_key_id, self.access_key_secret)
         self.service = Service(self.auth, self.end_point)
         self.bucket = Bucket(self.auth, self.end_point, self.bucket_name)
+        self._bucket_acl = None
 
-        # try to get bucket acl to check bucket exist or not
-        try:
-            self.bucket_acl = self.bucket.get_bucket_acl().acl
-        except oss2.exceptions.NoSuchBucket:
-            raise SuspiciousOperation("Bucket '%s' does not exist." % self.bucket_name)
+    @property
+    def bucket_acl(self):
+        if not self._bucket_acl:
+            try:
+                self._bucket_acl = self.bucket.get_bucket_acl().acl
+            except oss2.exceptions.NoSuchBucket:
+                raise SuspiciousOperation("Bucket '%s' does not exist." % self.bucket_name)
+
+        return self._bucket_acl
 
     def _get_key_name(self, name):
         """
@@ -209,7 +216,7 @@ class OssStorage(Storage):
     def url(self, name):
         key = self._get_key_name(name)
         str = self.bucket.sign_url('GET', key, expires=self.expire_time)
-        if self.bucket_acl != BUCKET_ACL_PRIVATE :
+        if self.bucket_acl != BUCKET_ACL_PRIVATE:
             idx = str.find('?')
             if idx > 0: 
                 str = str[:idx].replace('%2F', '/')
