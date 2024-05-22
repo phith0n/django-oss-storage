@@ -5,7 +5,7 @@ import logging
 import requests
 import oss2
 
-from datetime import timedelta
+from datetime import timedelta, timezone as builtin_timezone
 from contextlib import contextmanager
 from logging.handlers import RotatingFileHandler
 from django.conf import settings
@@ -14,7 +14,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.core.files.storage import default_storage
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.utils import timezone
-from django.utils.timezone import is_naive, make_naive, utc
+from django.utils.timezone import is_naive, make_naive
 from django_oss_storage.backends import OssError, OssMediaStorage, OssStaticStorage, OssStorage, _get_config
 from django_oss_storage import defaults
 from oss2 import to_unicode
@@ -170,7 +170,7 @@ class TestOssStorage(SimpleTestCase):
             modified_time = default_storage.modified_time("test.txt")
             logging.info("modified time: %s", modified_time)
             self.assertTrue(is_naive(modified_time))
-            self.assertLess(abs(modified_time - make_naive(timezone.now(), utc)), timedelta(seconds=10))
+            self.assertLess(abs(modified_time - make_naive(timezone.now(), builtin_timezone.utc)), timedelta(seconds=10))
             self.assertEqual(default_storage.accessed_time("test.txt"), modified_time)
             self.assertEqual(default_storage.created_time("test.txt"), modified_time)
 
