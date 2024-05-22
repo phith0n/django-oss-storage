@@ -4,18 +4,13 @@ import os
 import six
 import shutil
 
-try:
-    from urllib.parse import urljoin
-except ImportError:
-    from urlparse import urljoin
-
-from datetime import datetime
+from urllib.parse import urljoin
+from datetime import datetime, timezone
 from django.core.files import File
 from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
 from django.core.files.storage import Storage
 from django.conf import settings
 from django.utils.deconstruct import deconstructible
-from django.utils.timezone import utc
 from tempfile import SpooledTemporaryFile
 from django.utils.encoding import force_str, force_bytes
 
@@ -181,7 +176,7 @@ class OssStorage(Storage):
         file_meta = self.get_file_meta(name)
 
         if settings.USE_TZ:
-            return datetime.utcfromtimestamp(file_meta.last_modified).replace(tzinfo=utc)
+            return datetime.utcfromtimestamp(file_meta.last_modified).replace(tzinfo=timezone.utc)
         else:
             return datetime.fromtimestamp(file_meta.last_modified)
 
